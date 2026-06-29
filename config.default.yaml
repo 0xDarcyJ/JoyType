@@ -1,0 +1,86 @@
+# ============================================================================
+# JoyType default configuration
+# Nintendo controller -> dictation/coding input controller
+#
+# Edit this file while JoyType is running; use the tray/menu reload command
+# or restart to apply changes without re-pairing the controller.
+# ============================================================================
+
+# --- Global input tuning ----------------------------------------------------
+deadzone: 0.15            # 0.0 - 1.0, ignore stick deflection below this
+stick_curve: exponential  # linear | exponential  (smoother small movements)
+poll_hz: 0                # 0 = read as fast as the device sends reports
+keep_alive_s: 20          # 0 = off; while connected, poke Joy-Con every N seconds
+
+# --- Mouse control (stick -> pointer) ---------------------------------------
+# On Joy-Con L the (only) analog stick is the LEFT stick, so left_stick drives
+# the cursor. right_stick is inactive on a lone Joy-Con L (no right stick).
+mouse:
+  left_stick: move        # move | off   (Joy-Con L analog stick -> cursor)
+  right_stick: scroll     # scroll | move | off   (inactive on Joy-Con L)
+  speed: 2500             # max pixels/second at full deflection
+  scroll_speed: 8         # notches/second at full deflection
+  acceleration: 2.5       # 1.0 = linear; the stick_curve already eases small moves
+  click_button: L3        # which pad press acts as left click (L3/R3/None)
+
+# --- Voice dictation --------------------------------------------------------
+# These MUST match the hotkeys set in your dictation tool (智谱: 长按模式 +
+# 免按模式).
+#   ZL (left trigger) = push-to-talk: JoyType HOLDS hold_hotkey down while ZL is
+#                       held, releases on let-go   ->  {voice: true}
+#                       Because it is HELD, hold_hotkey must NOT contain Alt - a
+#                       held Alt activates Win32 menu access keys (Alt->File).
+#   L  (left button)  = latching toggle: TAPS toggle_hotkey each press
+#                       ->  {voice_toggle: true}
+#                       A quick tap may briefly contain Alt without latching the
+#                       menu, so matching 智谱's 左Ctrl+左Alt+F8 is fine here.
+# A lost release can never jam the keyboard: the daemon force-releases the chord
+# on disconnect/shutdown (see VoiceAction.panic_release).
+voice:
+  hold_hotkey: [lshift, lctrl, f8]     # 长按模式 (PTT)  - ZL holds this
+  toggle_hotkey: [lctrl, lalt, f8]     # 免按模式 (toggle) - L taps this
+
+# --- Haptic feedback --------------------------------------------------------
+haptics:
+  click: [ZL, L, LEFT_SL, LEFT_SR, L3, MINUS, CAPTURE, UP, DOWN, LEFT, RIGHT, A, B, X, Y, ZR, R, RIGHT_SL, RIGHT_SR, R3, PLUS, HOME]
+  strength: medium
+
+# --- Key bindings -----------------------------------------------------------
+# `default` is the only profile shipped in the release template. Create extra
+# per-app profiles in the GUI so personal workflow settings stay local.
+#
+# Action shapes:
+#   {key: enter}                      single key
+#   {hotkey: [ctrl, c]}               chord (keys held together, then released)
+#   {voice: true}                     push-to-talk dictation (voice.hold_hotkey)
+#   {voice_toggle: true}              toggle dictation (voice.toggle_hotkey)
+#   {triggers: {press: {...}, double: {...}, hold: {after_ms: 350, action: {...}}}}
+#                                      optional press/double/hold gestures
+
+profiles:
+
+  default:
+    # The ONE base layer - tuned for Joy-Con L (the primary controller).
+    # Applies in every window. Only the 11 physical Joy-Con L buttons are
+    # mapped; the rest stay unset.
+    bindings:
+      # Voice - the two dictation shortcuts you configured in your voice IME.
+      ZL: {voice: true}                     # 长按说话 hold=talk (LShift+LCtrl+F8)
+      L: {voice_toggle: true}               # 免按 toggle on/off (LCtrl+LAlt+F8)
+      # High-frequency coding keys.
+      MINUS: {key: enter}                   # SEND message (per-app profiles override)
+      # L3 (press the stick in) = LEFT MOUSE BUTTON; see mouse.click_button.
+      # The left analog stick now moves the cursor. (Rebind tab elsewhere via the
+      # GUI if you want it back.)
+      # D-pad as arrow keys.
+      UP: {key: up}
+      DOWN: {key: down}
+      LEFT: {key: left}
+      RIGHT: {key: right}
+      LEFT_SL: {hotkey: [alt, tab]}         # window forward
+      LEFT_SR: {hotkey: [shift, alt, tab]}  # window reverse
+
+    # ---- Per-app overrides --------------------------------------------------
+    # Each override inherits every unlisted button from the base layer above.
+    # The release template ships none; create app-specific overrides in the GUI.
+    overrides: {}

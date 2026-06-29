@@ -1,0 +1,17 @@
+# JoyType - Nintendo controller -> dictation/coding input controller
+# Python 3.10+
+
+# HID device access (Joy-Con raw report parsing).
+# Install `hidapi`; it provides the import name `hid` and bundles hidapi.dll
+# on Windows.
+hidapi>=0.14
+
+# Config files
+PyYAML>=6.0
+ruamel.yaml>=0.18
+
+# GUI host (PySide6 QtWebEngine). Used by joytype_gui.py.
+PySide6>=6.5
+
+# Build-only: needed to produce JoyType.exe via build_exe.bat, NOT at runtime.
+# pyinstaller>=6.0

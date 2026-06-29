@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <title>JoyType</title>
+  <link rel="stylesheet" href="style.css?v=live-stick-1">
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+<div id="viewport">
+  <div id="stage"><div id="app">
+    <div class="window-controls">
+      <button class="wc-min" title="Minimize" aria-label="Minimize"><span class="wc-icon"></span></button>
+      <button class="wc-close" title="Close" aria-label="Close"><span class="wc-icon"></span></button>
+    </div>
+    <header class="header">
+      <div class="header-logo">
+        <div class="brand-block">
+          <span class="brand">JoyType</span>
+        </div>
+        <div class="header-device" id="deviceStatus" aria-label="Joy-Con offline" title="Joy-Con offline">
+          <span class="device-led offline" id="connLed" aria-hidden="true"></span>
+          <span class="battery-meter level-0" id="batteryMeter" aria-label="Battery level 0 of 5">
+            <i></i><i></i><i></i><i></i><i></i>
+          </span>
+        </div>
+      </div>
+      <div class="header-center" aria-hidden="true">
+      </div>
+    </header>
+
+    <main class="main">
+      <aside class="left">
+        <div class="profiles-title"><span class="section-label">PROFILES</span><span id="profileCount">04</span></div>
+        <div id="profileList"></div>
+        <div class="profile-actions">
+          <button class="new-profile" id="newProfile"><span>ADD PROFILE</span></button>
+          <button class="new-profile" id="newOverride"><span>ADD OVERRIDE</span></button>
+        </div>
+        <div class="match-editor" id="matchEditor"></div>
+      </aside>
+
+      <section class="workspace" id="workspace">
+        <div class="workspace-head">
+          <div class="device-title">JOY-CON L</div>
+          <div class="desc" id="editingHint">DEFAULT · ALL APPS</div>
+        </div>
+        <div id="modelStage" aria-label="Joy-Con model">
+          <div id="modelWrap" class="view-3d"><img id="modelImage" draggable="false" alt="Joy-Con view" src="img/model_3d.webp?v=live-stick-1"><div id="hotspots"></div></div>
+        </div>
+        <div class="workspace-controls">
+          <div class="control-group view-control">
+            <button class="view-btn active" data-view="3d" aria-label="3D view" title="3D view"><img class="view-thumb" src="img/model_3d.webp?v=live-stick-1" alt=""></button>
+            <button class="view-btn" data-view="top" aria-label="Top view" title="Top view"><img class="view-thumb" src="img/model_top.webp?v=live-stick-1" alt=""></button>
+          </div>
+        </div>
+        <div id="toast" role="status"></div>
+      </section>
+
+      <aside class="inspector">
+        <section class="inspector-section state-section" id="stateSection">
+          <div class="state-block selected-section" id="selectedSection">
+            <div class="section-title"><span>BUTTON</span></div>
+            <div class="selected-display">
+              <div class="big-orb" id="inspectNo">08</div>
+              <div class="selected-copy">
+                <div class="big-name" id="inspectName">SL</div>
+                <div class="group" id="inspectGroup">RAIL</div>
+              </div>
+              <span class="sel-dot"></span><span class="selected-word" id="bindState">OVERRIDE</span>
+            </div>
+          </div>
+
+          <div class="state-block assignment-section" id="assignmentSection">
+            <div class="section-title"><span>TRIGGERS</span></div>
+            <div class="assignment-grid" id="assignmentRows"></div>
+          </div>
+
+          <div class="state-block mode-section" id="modeSection">
+            <div class="section-title"><span>MODE</span></div>
+            <div class="mode-strip" id="actionGrid"></div>
+          </div>
+        </section>
+        <div class="inspector-tabs" id="inspectorTabs"></div>
+
+        <section class="inspector-section command-section" id="commandSection">
+          <div class="section-title"><span id="valueLabel">COMMAND</span></div>
+          <div class="command-layout">
+            <div class="command-console" id="commandReadout">
+              <div class="command-value" id="commandValue">ESC</div>
+              <div class="command-prompt" id="commandPrompt">&gt;_</div>
+              <div id="valueEditor"></div>
+            </div>
+          </div>
+          <div class="behavior-section" id="behaviorSection">
+            <div class="behavior-summary"><span>TIMING</span><span id="behaviorSummaryValue">GESTURE WINDOW</span></div>
+            <div class="behavior-editor" id="behaviorEditor"></div>
+          </div>
+        </section>
+
+        <section class="inspector-section actions-section" id="actionsSection">
+          <div class="actions-row">
+            <button class="action-btn utility" id="clearButton" title="Remove this override and inherit from DEFAULT">RESET</button>
+            <button class="action-btn" id="revertButton">REVERT</button>
+            <button class="action-btn apply saved" id="applyButton">SAVED</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div></div>
+</div>
+<script src="app.js?v=live-stick-1"></script>
+</body>
+</html>
