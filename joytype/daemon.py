@@ -111,6 +111,8 @@ class ControllerDaemon:
 
         self._lifecycle_lock = threading.RLock()
         self._binder_lock = threading.RLock()
+        self._reload_deferred_lock = threading.Lock()
+        self._reload_deferred_thread: Optional[threading.Thread] = None
         self._worker_generation = 0
 
         # Binder is built up-front so config errors surface immediately.
@@ -521,19 +523,61 @@ class ControllerDaemon:
             self.binder.set_profile(name)
         self._emit_status()
 
-    def reload_config(self) -> None:
+    def reload_config(self, *, max_block_s: float | None = None) -> bool:
         """Public reload entry point (e.g. GUI 'Reload' button)."""
+        try:
+            self._reload_config(lock_timeout=max_block_s)
+            self._emit_log("INFO", "Config reloaded.")
+            self._emit_status()
+            return True
+        except TimeoutError:
+            self._emit_log("WARNING", "Config reload deferred; input loop is busy.")
+            self._schedule_deferred_reload()
+            return False
+        except ConfigError as exc:
+            self._emit_log("ERROR", f"Config error: {exc}")
+            return False
+
+    def _schedule_deferred_reload(self) -> None:
+        with self._reload_deferred_lock:
+            if (
+                self._reload_deferred_thread is not None
+                and self._reload_deferred_thread.is_alive()
+            ):
+                return
+            thread = threading.Thread(
+                target=self._run_deferred_reload,
+                name="input-platform-reload",
+                daemon=True,
+            )
+            self._reload_deferred_thread = thread
+            thread.start()
+
+    def _run_deferred_reload(self) -> None:
         try:
             self._reload_config()
             self._emit_log("INFO", "Config reloaded.")
             self._emit_status()
         except ConfigError as exc:
             self._emit_log("ERROR", f"Config error: {exc}")
+        except Exception as exc:  # noqa: BLE001 - background reload must not die loudly
+            self._emit_log("ERROR", f"Config reload failed: {exc}")
+            log.exception("deferred config reload failed")
+        finally:
+            with self._reload_deferred_lock:
+                current = threading.current_thread()
+                if self._reload_deferred_thread is current:
+                    self._reload_deferred_thread = None
 
-    def _reload_config(self) -> None:
+    def _reload_config(self, *, lock_timeout: float | None = None) -> None:
         """Rebuild the binder from disk after safely releasing held actions."""
         fresh = self._build_binder()
-        with self._binder_lock:
+        if lock_timeout is None:
+            self._binder_lock.acquire()
+        else:
+            if not self._binder_lock.acquire(timeout=max(lock_timeout, 0.0)):
+                raise TimeoutError("binder is busy")
+        try:
             manual_profile = self.binder._manual_profile  # noqa: SLF001
             active_profile = self.binder._active_name  # noqa: SLF001
 
@@ -547,3 +591,5 @@ class ControllerDaemon:
             if active_profile in fresh._compiled:  # noqa: SLF001
                 fresh._active_name = active_profile  # noqa: SLF001
             self.binder = fresh
+        finally:
+            self._binder_lock.release()

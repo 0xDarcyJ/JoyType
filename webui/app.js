@@ -929,12 +929,21 @@
     bridge[method](...args, res=>{
       let r={}; try{ r=JSON.parse(res); }catch(e){}
       if(r && r.ok===false){ toast('ERROR: '+(r.error||'failed')); return; }
-      if(onOk) onOk();
+      if(onOk) onOk(r);
     });
   }
+  function afterWriteReload(r, cb){
+    if(r && r.reload==='deferred'){
+      toast('SAVED · RELOADING');
+      setTimeout(cb, 350);
+    } else {
+      cb();
+    }
+  }
   function call(method, args, onOk){
-    bridgeCall(method,args,()=>{
-      refresh(()=>{ if(onOk) onOk(); loadTarget(editTarget); });
+    bridgeCall(method,args,r=>{
+      const refreshAfterWrite=()=>refresh(()=>{ if(onOk) onOk(r); loadTarget(editTarget); });
+      afterWriteReload(r, refreshAfterWrite);
     });
   }
 
@@ -945,10 +954,16 @@
     const saveHaptics=hapticsDirty();
     if(!saveAction && !saveHaptics) return toast('NOTHING TO APPLY');
     const binding=composedBindingForEdit();
-    const finish=()=>refresh(()=>{ toast('APPLIED · '+layerDisplay(editTarget)); loadTarget(editTarget); });
-    const saveHapticDraft=()=>{
+    let deferredReload = false;
+    const rememberReload = r => { if(r && r.reload==='deferred') deferredReload = true; };
+    const finish=()=>afterWriteReload(
+      deferredReload ? {reload:'deferred'} : null,
+      ()=>refresh(()=>{ toast('APPLIED · '+layerDisplay(editTarget)); loadTarget(editTarget); })
+    );
+    const saveHapticDraft=r=>{
+      rememberReload(r);
       if(!saveHaptics) return finish();
-      bridgeCall('setHapticsConfig',[JSON.stringify(hapticDraftConfig())],finish);
+      bridgeCall('setHapticsConfig',[JSON.stringify(hapticDraftConfig())],r2=>{ rememberReload(r2); finish(); });
     };
     if(saveAction && binding) bridgeCall('setBinding',[editTarget, selected, JSON.stringify(binding)], saveHapticDraft);
     else saveHapticDraft();
@@ -1053,7 +1068,7 @@
     const M={left_stick:'move',right_stick:'scroll',speed:2500,scroll_speed:8,acceleration:2.5};
     const H={click:['ZL','L','LEFT_SL','LEFT_SR','L3','MINUS','CAPTURE','UP','DOWN','LEFT','RIGHT','A','B','X','Y','ZR','R','RIGHT_SL','RIGHT_SR','R3','PLUS','HOME'], strength:'medium'};
     return {
-      getAppVersion:cb=>cb('0.0.2'),
+      getAppVersion:cb=>cb('0.0.3'),
       getStatus:cb=>cb(J({running:true,connected:true,battery:3,charging:false,profile:'default'})),
       getVoiceConfig:cb=>cb(J(V)),
       setVoiceHotkey:(m,kj,cb)=>{ V[m]=JSON.parse(kj); cb(J({ok:true})); },

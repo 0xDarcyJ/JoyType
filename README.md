@@ -1,10 +1,10 @@
 # JoyType
 
-Use a Bluetooth Joy-Con as a tiny Windows controller for dictation, coding, and fast desktop actions.
+Use a Bluetooth Joy-Con as a compact Windows controller for dictation, coding, and fast desktop actions.
 
 ![JoyType configuration UI](assets/joytype-config-ui.png)
 
-JoyType maps a Joy-Con L to mouse movement, keyboard shortcuts, window switching, and external dictation hotkeys. It is built for hands-on coding workflows where you want push-to-talk, send/enter, arrow keys, and window switching close to your thumb.
+JoyType maps a Joy-Con L to pointer movement, clicks, keyboard shortcuts, window switching, and dictation hotkeys. The configuration UI keeps a clean base profile visible while letting you add per-app overrides, tune button behavior, and adjust the stick pointer without hand-editing YAML.
 
 ## Why JoyType
 
@@ -12,25 +12,21 @@ JoyType maps a Joy-Con L to mouse movement, keyboard shortcuts, window switching
 - Move the pointer with the analog stick and click by pressing the stick.
 - Send common coding/chat actions like Enter, arrows, Escape, and window switching.
 - Edit mappings in a visual Joy-Con UI instead of memorizing raw config.
-- Keep app-specific profiles local; the release default starts clean with one global profile.
+- Use profile layers to keep one clean base profile and add per-app overrides only where they help.
+- Tune click feedback, double-tap timing, hold timing, and stick pointer sensitivity from the Config view.
 
 ## Download
 
-Download the latest package for your platform from [GitHub Releases](https://github.com/0xDarcyJ/JoyType/releases/latest).
-
-Requirements for the current public preview:
-
-- Windows 10/11
-- A paired Joy-Con L
-- An external dictation app if you use the voice actions
+Download the latest Windows zip from [GitHub Releases](https://github.com/0xDarcyJ/JoyType/releases/latest).
+Pair your Joy-Con in Windows Bluetooth settings before launching JoyType. Voice actions trigger configurable hotkeys for your own dictation tool.
 
 ## Quick Start
 
-1. Download the Windows zip, macOS dmg, or Linux AppImage for your platform.
-2. Install or extract the package.
-3. Pair your Joy-Con in your operating system's Bluetooth settings.
-4. Run JoyType.
-5. Open the Config view to adjust button actions, mouse feel, and dictation hotkeys.
+1. Download `JoyType-v*-windows-x64.zip` from the latest release.
+2. Extract the zip to a folder such as `C:\JoyType\`.
+3. Pair your Joy-Con in Windows Bluetooth settings.
+4. Run `JoyType.exe`.
+5. Open the Config view to adjust profile layers, button actions, stick pointer feel, Tune settings, and dictation hotkeys.
 
 ## Default Controls
 
@@ -45,7 +41,7 @@ Requirements for the current public preview:
 | LEFT_SL | Window forward |
 | LEFT_SR | Window reverse |
 
-JoyType does not include speech recognition. It sends global hotkeys to your existing dictation tool. The default voice hotkeys are `LeftShift + LeftCtrl + F8` for push-to-talk and `LeftCtrl + LeftAlt + F8` for toggle dictation.
+Voice buttons trigger configurable hotkeys for your existing dictation tool. The default voice hotkeys are `LeftShift + LeftCtrl + F8` for push-to-talk and `LeftCtrl + LeftAlt + F8` for toggle dictation.
 
 ## Configuration
 
@@ -55,9 +51,12 @@ Packaged builds keep the user-editable config beside the app:
 JoyType/
   JoyType.exe
   config.yaml
+  _internal/
 ```
 
-Most settings can be edited from the UI. `config.yaml` is still there for advanced edits and backup.
+Most settings can be edited from the UI, including profile overrides, actions, Tune settings, and stick pointer behavior. `config.yaml` is still there for advanced edits and backup.
+
+When running from source, JoyType writes ignored `config.local.yaml` from the checked-in `config.default.yaml`, so local settings stay separate from the release default.
 
 ## Joy-Con Diagnosis
 
@@ -78,10 +77,7 @@ Joy-Con connections can require removing and re-pairing after the controller has
 
 ## Run From Source
 
-Requirements:
-
-- Python 3.10+
-- Windows 10/11
+Requirements: Python 3.10+ on Windows.
 
 ```cmd
 pip install -r requirements.txt

@@ -1,7 +1,13 @@
-"""Path resolution for source runs and packaged app runs.
+"""Path resolution that works both in development and when frozen.
 
-Packaged builds keep ``config.yaml`` beside the app so users can edit it.
-Source runs copy ``config.default.yaml`` to ``config.local.yaml`` on first use.
+When PyInstaller bundles the app (``--onedir``), the exe lives in
+``dist/JoyType/JoyType.exe`` and ``config.yaml`` ships alongside it (NOT inside
+the bundle), so users can edit it. This module finds that config regardless
+of the current working directory.
+
+Development mode (``python joytype_gui.py``): the checked-in release defaults
+live in ``config.default.yaml``; the GUI writes to ignored ``config.local.yaml``
+so local edits do not leak into release packages.
 """
 
 from __future__ import annotations
@@ -16,7 +22,7 @@ LOCAL_NAME = "config.local.yaml"
 
 
 def is_frozen() -> bool:
-    """True when running from a packaged app."""
+    """True when running inside a PyInstaller bundle."""
     return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 
@@ -46,9 +52,9 @@ def _copy_if_missing(source: Path, target: Path) -> Path:
 def ensure_runtime_config_path(root: Path | None = None) -> Path:
     """Return the writable config file used by the running app.
 
-    Packaged builds use ``config.yaml`` beside the app. Source runs use
-    ``config.local.yaml``, created from ``config.default.yaml`` on first run.
-    This keeps the release template separate from local GUI edits.
+    Frozen builds use ``config.yaml`` beside ``JoyType.exe``. Development uses
+    ignored ``config.local.yaml``, created from ``config.default.yaml`` on first
+    run. This keeps the release template separate from local GUI edits.
     """
     if is_frozen():
         beside_exe = exe_dir() / DEFAULT_NAME
@@ -87,7 +93,7 @@ def default_config_path(name: str = DEFAULT_NAME) -> Path:
          is missing.
       3. Copy bundled legacy ``config.yaml`` there if present in an old build.
 
-    Source mode: ``config.local.yaml`` copied from ``config.default.yaml``.
+    Dev mode: ignored ``config.local.yaml`` copied from ``config.default.yaml``.
     """
     if name == DEFAULT_NAME:
         return ensure_runtime_config_path()
@@ -96,7 +102,7 @@ def default_config_path(name: str = DEFAULT_NAME) -> Path:
         beside_exe = exe_dir() / name
         if beside_exe.exists():
             return beside_exe
-        # Packaged builds can keep read-only resources under _internal/.
+        # PyInstaller 6+ onedir puts datas in <exe_dir>/_internal/
         in_bundle = exe_dir() / "_internal" / name
         if in_bundle.exists():
             return in_bundle
@@ -104,7 +110,7 @@ def default_config_path(name: str = DEFAULT_NAME) -> Path:
 
 
 def bundle_dir() -> Path:
-    """The packaged resource root, or the repo root in source mode.
+    """The PyInstaller bundle root (_MEIPASS), or the repo root in dev.
 
     Useful for locating read-only assets that ARE bundled into the exe (icons,
     default templates, etc.). The writable config is deliberately NOT here.

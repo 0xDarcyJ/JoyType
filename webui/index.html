@@ -3,6 +3,15 @@
 <head>
   <meta charset="utf-8">
   <title>JoyType</title>
+  <style id="critical-shell">
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#e8eeee}
+    #viewport{position:fixed;inset:0;display:grid;place-items:center;background:#e8eeee}
+    #stage{position:relative;width:100%;height:100%;overflow:hidden}
+    #app{position:absolute;left:0;top:0;width:1600px;height:900px;background:#e8eeee;overflow:hidden}
+    #modelStage{position:absolute;inset:86px 0 24px 0;overflow:hidden}
+    #modelWrap{position:absolute;left:50%;top:51.4%;width:400px;height:690px;transform:translate(-50%,-50%)}
+    #modelImage{width:100%;height:100%;object-fit:contain;display:block}
+  </style>
   <link rel="stylesheet" href="style.css?v=live-stick-1">
   <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 </head>

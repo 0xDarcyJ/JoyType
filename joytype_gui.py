@@ -177,8 +177,8 @@ class Bridge(QObject):
             fn(self._d.config_path, *args)
         except Exception as exc:  # validation / IO error: config left intact
             return json.dumps({"ok": False, "error": str(exc)})
-        self._d.reload_config()
-        return json.dumps({"ok": True})
+        applied = self._d.reload_config(max_block_s=0.2)
+        return json.dumps({"ok": True, "reload": "applied" if applied else "deferred"})
 
     @Slot(str, str, str, result=str)
     def setBinding(self, profile: str, button: str, action_json: str) -> str:
